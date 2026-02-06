@@ -12,39 +12,39 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
 
     steps:
-      - name: Checkout code
+      - name: 1. Recuperation du code source
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 2. Installation de Node.js v20
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: 3. Installation des dependances npm
         run: npm install
 
-      - name: Lint
+      - name: 4. Verification du code (lint)
         run: npm run lint
 
-      - name: Generate static site
+      - name: 5. Generation du site statique Nuxt
         run: npm run generate
 
-      - name: Configure AWS credentials
+      - name: 6. Connexion aux services AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-3
 
-      - name: Sync to S3
+      - name: 7. Upload des fichiers vers S3
         run: aws s3 sync .output/public/ s3://${{ secrets.S3_BUCKET }} --delete
 
-      - name: Invalidate CloudFront cache
+      - name: 8. Invalidation du cache CloudFront
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
-      - name: Deployment summary
-        run: echo "Deployed to ${{ secrets.CLOUDFRONT_URL }}"
+      - name: 9. Deploiement termine avec succes
+        run: echo "Site deploye sur ${{ secrets.CLOUDFRONT_URL }}"
