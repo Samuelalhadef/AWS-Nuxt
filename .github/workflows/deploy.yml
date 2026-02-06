@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
 
     steps:
       - name: Checkout code
@@ -36,10 +38,13 @@ jobs:
           aws-region: eu-west-3
 
       - name: Sync to S3
-        run: aws s3 sync .output/public/ s3://nuxtappiimsamuelalhadef --delete
+        run: aws s3 sync .output/public/ s3://${{ vars.S3_BUCKET }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E18HZEE2NRSQL0 \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
+
+      - name: Deployment summary
+        run: echo "Deployed to ${{ vars.CLOUDFRONT_URL }}"
