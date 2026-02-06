@@ -38,13 +38,13 @@ jobs:
           aws-region: eu-west-3
 
       - name: Sync to S3
-        run: aws s3 sync .output/public/ s3://${{ vars.S3_BUCKET }} --delete
+        run: aws s3 sync .output/public/ s3://${{ secrets.S3_BUCKET }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
       - name: Deployment summary
-        run: echo "Deployed to ${{ vars.CLOUDFRONT_URL }}"
+        run: echo "Deployed to ${{ secrets.CLOUDFRONT_URL }}"
