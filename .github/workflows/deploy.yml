@@ -12,39 +12,39 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
 
     steps:
-      - name: 1. Recuperation du code source
+      - name: "Etape 1 : Recuperation du code source depuis GitHub"
         uses: actions/checkout@v4
 
-      - name: 2. Installation de Node.js v20
+      - name: "Etape 2 : Installation de Node.js v20"
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: 3. Installation des dependances npm
+      - name: "Etape 3 : Installation des dependances (npm install)"
         run: npm install
 
-      - name: 4. Verification du code (lint)
+      - name: "Etape 4 : Verification de la qualite du code (ESLint)"
         run: npm run lint
 
-      - name: 5. Generation du site statique Nuxt
+      - name: "Etape 5 : Build - Generation du site statique Nuxt"
         run: npm run generate
 
-      - name: 6. Connexion aux services AWS
+      - name: "Etape 6 : Authentification aux services AWS (IAM)"
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-3
 
-      - name: 7. Upload des fichiers vers S3
+      - name: "Etape 7 : Deploiement des fichiers vers le bucket S3"
         run: aws s3 sync .output/public/ s3://${{ secrets.S3_BUCKET }} --delete
 
-      - name: 8. Invalidation du cache CloudFront
+      - name: "Etape 8 : Invalidation du cache CDN (CloudFront)"
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
-      - name: 9. Deploiement termine avec succes
-        run: echo "Site deploye sur ${{ secrets.CLOUDFRONT_URL }}"
+      - name: "Etape 9 : Deploiement termine - Site en ligne"
+        run: echo "Site deploye avec succes sur ${{ secrets.CLOUDFRONT_URL }}"

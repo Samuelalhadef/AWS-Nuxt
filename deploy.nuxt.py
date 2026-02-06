@@ -95,6 +95,8 @@ def invalidate_cloudfront(cf_client, cloudfront_id):
         print("\nATTENTION: Pas d'ID CloudFront configure, cache non invalide.")
         return
     print(f"\n{'='*50}")
+
+    
     print(f">> Invalidation du cache CloudFront: {cloudfront_id}")
     print(f"{'='*50}")
     response = cf_client.create_invalidation(
